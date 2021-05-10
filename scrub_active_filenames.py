@@ -12,8 +12,13 @@ print('path: {0}'.format(path))
 print('Directory to be scanned should be named \'{0}\' in {1}'.format(NAMEOFDIR,path))
 # data to be written row-wise in csv file
 path_active = join(path,NAMEOFDIR)
+
 if os.path.isdir(path_active):
-    active_file_names = [f for f in listdir(path_active) if isfile(join(path_active,f))]
+    active_file_names = ["KEY COLUMN - ORIGINAL - DO NOT CHANGE"]
+    for f in listdir(path_active):  # for f in listdir(path_active) ie, for (potential filename in directory)
+           if isfile(join(path_active,f)): # if filename joined to path is actually a file
+               active_file_names.append(("{0}\t{1}").format(f,f)) #append new row with filename coppied twice to that row.
+               
     # opening the csv file in 'w+' mode
     if os.path.exists(NAMEOFFILE):
         print('{0} already exists.'.format(NAMEOFFILE))
