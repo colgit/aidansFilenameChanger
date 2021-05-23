@@ -1,56 +1,32 @@
 
 
 # The purpose of this program is to rename the files in the active folder which 
-# match the names in the first column, a_column to match the names in the second column, b_column.
+# match the names in the first column, a_column, to match the names in the second column, b_column.
 # If there are duplicate names in b_column they will be renamed such that 
-# (1),(2),(3)...etc is appended to the name.
+# (2),(3),(4)...etc is appended to the name.
 
-# Open Names file for reading
-# Load dictionary with A_column:b_column pairs.
-# For each element in b_column
-    #find all duplicate strings and save keys in rename list
-    #i=1
-    #while keys remain in renameList,
-        #append "("+ i + ")"
-        #pop off list
-        #i++
 
-# While keys remain in dictionary
-    #change filename of matching key to renamed version.
-    #remove key/pair from dictionary
-
-import re
 import csv
 import os
 import os.path
-import shutil
-from csv import DictReader
 from os import listdir
 from os.path import join, isfile
 
 NAMEOFFILE = 'filenames_in_active.cvs'
 NAMEOFDIR = 'active'
-NAMEOF_DUPLICATE = 'duplicates'
 print('getting path...')
 path = os.getcwd()
 print('path: {0}'.format(path))
 path_active = join(path,NAMEOFDIR)
-path_duplicate = join(path_active,NAMEOF_DUPLICATE)
-try:
-    os.mkdir(path_duplicate)
-except:
-    print("Attempted to create duplicates directory but directory already exists.")
+
 def create_dictionary():
     filename_dict = {}
-    if os.path.isdir(path_active):          #check that program can find a directory called "Active"
-        #active_file_names = [f for f in listdir(path_active) if isfile(join(path_active,f))]
-        # opening the csv file in 'wr' mode
-        if os.path.exists(NAMEOFFILE):
-            with open(NAMEOFFILE, 'r', newline = '') as file_name_strings:
+    if os.path.isdir(path_active):              #check that program can find a directory called "Active"
+        if os.path.exists(NAMEOFFILE):          #check that cvs file of name changes exists. 
+            with open(NAMEOFFILE, 'r', newline = '') as file_name_strings:      
                 print("loading dictionary...")
 
                 file_data = csv.reader(file_name_strings)
-            #### header = next(file_data)  # IF HEADER IS USED.
 
                 for row in file_data:
                     row_split_list = row[0].split('\t')
@@ -61,17 +37,30 @@ def create_dictionary():
         print('Looking for directory named "active." ')
     return filename_dict
 
-
-
 def change_names():
     for entry in listdir(path_active):
         if filename_dict.get(entry) != None:
+            new_filename = filename_dict.get(entry)
             try:
-                print("Changing name from {0}, \n to {1}".format(entry,{filename_dict.get(entry)}))
-                os.rename(join(path_active,entry),join(path_active,filename_dict.get(entry)))
+                print("Changing name from {0}, \n to {1}".format(entry,{new_filename}))
+                os.rename(join(path_active,entry),join(path_active,new_filename))
             except FileExistsError:
-                shutil.move(join(path_active,entry), join(path_duplicate,entry))
-                print("File of that name already exists. Moved file to {0}.\n".format(path_duplicate))
+                print("That name already exists.")
+                append_num(1, new_filename, entry)
+
+def append_num(num, filename, entry):
+    flag = False
+    while flag == False:
+        root, ext = os.path.splitext(filename)
+        new_filename = "{0}({1}){2}".format(root,num + 1,ext)
+        print("Changing name from {0}, \n to {1}".format(entry,{new_filename}))
+        try:
+            os.rename(join(path_active,entry),join(path_active,new_filename))  
+        except FileExistsError:
+            print("That name already exists.")
+            num = num + 1
+        else:
+            flag = True
 
 filename_dict = create_dictionary()
 change_names()
